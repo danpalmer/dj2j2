@@ -2,6 +2,9 @@ import os
 import pytest
 import subprocess
 
+import dj2j2
+from jinja2 import Template as JTemplate
+
 @pytest.fixture(scope='session')
 def dj2j2_run():
     def inner(*args, **kwargs):
@@ -35,4 +38,12 @@ def data_file(data_path):
     def inner(name):
         with open(data_path(name)) as f:
             return f.read()
+    return inner
+
+@pytest.fixture(scope='session')
+def assert_equal():
+    def inner(first, second):
+        output = dj2j2.transpile_content(first)
+        assert output == second
+        JTemplate(output)
     return inner
