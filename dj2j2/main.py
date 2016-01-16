@@ -4,6 +4,7 @@ import click
 from jinja2 import Template as JTemplate
 from django.template import Template as DTemplate
 
+from .report import Report
 from .transpile import transpile_template
 from .django_settings import configure_django
 
@@ -17,6 +18,8 @@ def run(indir, outdir, infile, outfile):
     A utility to transpile Django templates to Jinja2 templates.
     """
 
+    report = Report()
+
     if infile and outfile:
         transpile(infile, outfile)
         validate(outfile)
@@ -28,15 +31,15 @@ def run(indir, outdir, infile, outfile):
         # Invalid argument set
         pass
 
-def transpile(infile_path, outfile_path):
+def transpile(report, infile_path, outfile_path):
     with open(infile_path, 'rb') as infile:
         with open(outfile_path, 'wb') as outfile:
-            outfile.write(transpile_content(infile.read()))
+            outfile.write(transpile_content(report, infile.read()))
 
-def transpile_content(incontent):
+def transpile_content(report, incontent):
     configure_django()
     template = DTemplate(incontent)
-    output = transpile_template(template)
+    output = transpile_template(report, template)
     return ''.join(output)
 
 def validate(outfile_path):
