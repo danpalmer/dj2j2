@@ -4,6 +4,7 @@ import click
 from jinja2 import Template as JTemplate
 from django.template import Template as DTemplate
 
+from .transpile import transpile_template
 from .django_settings import configure_django
 
 @click.command()
@@ -35,7 +36,8 @@ def transpile(infile_path, outfile_path):
 def transpile_content(incontent):
     configure_django()
     template = DTemplate(incontent)
-    return incontent
+    output = transpile_template(template)
+    return ''.join(output)
 
 def validate(outfile_path):
     try:
