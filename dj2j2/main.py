@@ -78,8 +78,8 @@ def transpile_dir(report, indir, outdir, extension):
 def transpile_file(report, infile_path, outfile_path):
     ensure_dir_exists(os.path.dirname(outfile_path))
 
-    with open(infile_path, 'rb') as infile:
-        with open(outfile_path, 'wb') as outfile:
+    with open(infile_path, 'r') as infile:
+        with open(outfile_path, 'w') as outfile:
             outfile.write(transpile_content(report, infile.read()))
 
 
@@ -104,7 +104,7 @@ def validate_dir(report, outdir, extension):
 
 def validate_file(report, outfile_path):
     try:
-        with open(outfile_path, 'rb') as outfile:
+        with open(outfile_path, 'r') as outfile:
             JTemplate(outfile.read()) # ignore result
     except Exception as e:
         report.add_failed_file(outfile_path, e)
