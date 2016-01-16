@@ -15,3 +15,21 @@ def handle(node_type):
 @handle('TextNode')
 def handle_text_node(text_node):
     yield text_node.s
+
+
+@handle('VariableNode')
+def handle_variable_node(var_node):
+    yield '{{ '
+
+    exp = var_node.filter_expression
+    yield exp.var.var
+
+    for filter_, args in exp.filters:
+        if callable(filter_):
+            yield '|%s' % filter_.__name__
+
+        if args:
+            args = args[0][1:] # Drop "False" initial arg
+            yield '(%s)' % ', '.join('\'%s\'' % x for x in args)
+
+    yield ' }}'
