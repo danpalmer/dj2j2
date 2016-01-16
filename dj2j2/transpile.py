@@ -48,6 +48,25 @@ def handle_if_node(if_node):
 
     yield '{% endif %}'
 
+@handler('ForNode')
+def handle_for_node(for_node):
+    yield '{%% for %s in %s%s %%}' % (
+        ', '.join(for_node.loopvars),
+        for_node.sequence,
+        '|reverse' if for_node.is_reversed else '',
+    )
+
+    for node in for_node.nodelist_loop:
+        yield handle(node)
+
+    if len(for_node.nodelist_empty):
+        yield '{% else %}'
+
+        for node in for_node.nodelist_empty:
+            yield handle(node)
+
+    yield '{% endfor %}'
+
 def handle_filter_expression(filter_expression):
     yield filter_expression.var.var
 
