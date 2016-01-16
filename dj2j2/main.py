@@ -21,7 +21,7 @@ def run(indir, outdir, infile, outfile):
     report = Report()
 
     if infile and outfile:
-        transpile(infile, outfile)
+        transpile(report, infile, outfile)
         validate(outfile)
 
     elif indir and outdir:
