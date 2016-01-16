@@ -41,9 +41,18 @@ def data_file(data_path):
     return inner
 
 @pytest.fixture(scope='session')
-def assert_equal():
-    def inner(first, second):
-        output = dj2j2.transpile_content(first)
-        assert second == output
+def transpile():
+    def inner(content):
+        report = dj2j2.Report()
+        output = dj2j2.transpile_content(report, content)
         JTemplate(output)
+        return output, report
+    return inner
+
+@pytest.fixture(scope='session')
+def assert_equal(transpile):
+    def inner(first, second):
+        output, report = transpile(first)
+        assert second == output
+        return output, report
     return inner
