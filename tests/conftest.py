@@ -29,3 +29,10 @@ def data_path():
         )
 
     return inner
+
+@pytest.fixture(scope='session')
+def data_file(data_path):
+    def inner(name):
+        with open(data_path(name)) as f:
+            return f.read()
+    return inner
