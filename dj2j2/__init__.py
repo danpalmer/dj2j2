@@ -1,2 +1,2 @@
-from .main import transpile, transpile_content
+from .main import transpile_file, transpile_content
 from .report import Report
