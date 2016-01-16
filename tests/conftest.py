@@ -44,6 +44,6 @@ def data_file(data_path):
 def assert_equal():
     def inner(first, second):
         output = dj2j2.transpile_content(first)
-        assert output == second
+        assert second == output
         JTemplate(output)
     return inner
