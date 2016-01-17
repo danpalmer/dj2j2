@@ -114,6 +114,11 @@ def handle_block_node(report, block_node):
     yield '{% endblock %}'
 
 
+@handler('CsrfTokenNode')
+def handle_csrf_token_node(report, csrf_token_node):
+    yield '{{ csrf_input }}'
+
+
 def handle_filter_expression(report, filter_expression):
     if isinstance(filter_expression.var, SafeText):
         yield '\'%s\'' % filter_expression.var
