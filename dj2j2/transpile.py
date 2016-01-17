@@ -44,12 +44,11 @@ VAR_NODE_SPECIAL_CASES = {
 
 @handler('VariableNode')
 def handle_variable_node(report, var_node):
-    exp_components = handle_filter_expression(
+    node_text = render_filter_exp(
         report,
         var_node.filter_expression,
     )
 
-    node_text = ''.join(exp_components)
     node_text = VAR_NODE_SPECIAL_CASES.get(node_text, node_text)
 
     yield '{{ %s }}' % node_text
@@ -64,22 +63,14 @@ def handle_if_node(report, if_node):
             if not condition.value:
                 # Condition is a boolean expression
                 condition_text = '%s %s %s' % (
-                    ''.join(handle_filter_expression(
-                        report,
-                        condition.first.value,
-                    )),
+                    render_filter_exp(report, condition.first.value),
                     condition.id,
-                    ''.join(handle_filter_expression(
-                        report,
-                        condition.second.value,
-                    )),
+                    render_filter_exp(report, condition.second.value),
                 )
             else:
                 # Condition is a simple filter expression
                 condition = condition.value
-                condition_text = ''.join(
-                    handle_filter_expression(report, condition),
-                )
+                condition_text = render_filter_exp(report, condition)
 
             yield '{%% %s %s %%}' % (
                 'if' if idx == 0 else 'elif',
@@ -125,8 +116,7 @@ def handle_load_node(report, load_node):
 
 @handler('ExtendsNode')
 def handle_extends_node(report, extends_node):
-    exp_components = handle_filter_expression(report, extends_node.parent_name)
-    extends = ''.join(exp_components)
+    extends = render_filter_exp(report, extends_node.parent_name)
 
     yield '{%% extends %s %%}' % extends
 
@@ -151,14 +141,12 @@ def handle_csrf_token_node(report, csrf_token_node):
 
 @handler('URLNode')
 def handle_url_node(report, url_node):
-    url = ''.join(handle_filter_expression(report, url_node.view_name))
+    url = render_filter_exp(report, url_node.view_name)
 
-    args = ', '.join(
-        ''.join(handle_filter_expression(report, x)) for x in url_node.args
-    )
+    args = ', '.join(render_filter_exp(report, x) for x in url_node.args)
 
     kwargs = ', '.join(
-        '%s=%s' % (x, ''.join(handle_filter_expression(report, y)))
+        '%s=%s' % (x, render_filter_exp(report, y))
         for x, y in sorted(url_node.kwargs.items())
     )
 
@@ -183,7 +171,11 @@ def handle_url_node(report, url_node):
         yield ' }}'
 
 
-def handle_filter_expression(report, filter_expression):
+def render_filter_exp(report, filter_expression):
+    return ''.join(_filter_expression(report, filter_expression))
+
+
+def _filter_expression(report, filter_expression):
     if isinstance(filter_expression.var, SafeText):
         yield '\'%s\'' % filter_expression.var
     else:
