@@ -106,10 +106,9 @@ def handle_for_node(report, for_node):
 @handler('LoadNode')
 def handle_load_node(report, load_node):
     libraries = load_node.token.split_contents()[1:]
-    lineno = load_node.token.lineno
 
     for library in libraries:
-        report.add_required_library(library, lineno)
+        report.add_required_library(library, load_node.token)
 
     yield '' # We must yield content
 
@@ -141,7 +140,7 @@ def handle_csrf_token_node(report, csrf_token_node):
 
 @handler('URLNode')
 def handle_url_node(report, url_node):
-    report.add_required_global('url')
+    report.add_required_global('url', url_node.token)
 
     url = render_filter_exp(report, url_node.view_name)
 
@@ -175,19 +174,39 @@ def handle_url_node(report, url_node):
 
 @handler('WithNode')
 def handle_with_node(report, with_node):
-    report.add_required_extension('jinja2.ext.with_')
+    report.add_required_extension('jinja2.ext.with_', with_node.token)
 
-    with_string = ', '.join(
-        '%s=%s' % (x, render_filter_exp(report, y))
-        for x, y in sorted(with_node.extra_context.items())
+    yield '{%% with %s %%}' % render_extra_context(
+        report,
+        with_node.extra_context,
     )
-
-    yield '{%% with %s %%}' % with_string
 
     for node in with_node.nodelist:
         yield handle(report, node)
 
     yield '{% endwith %}'
+
+
+@handler('IncludeNode')
+def handle_include_node(report, include_node):
+    extra_context = render_extra_context(report, include_node.extra_context)
+    only_string = ' without context' if include_node.isolated_context else ''
+
+    if extra_context:
+        if only_string:
+            # Only passing through a select context is supported in Django
+            # but not in Jinja2
+            report.add_invalid_include(include_node.token.lineno)
+
+        yield '{%% with %s %%}' % extra_context
+
+    yield '{%% include %s%s %%}' % (
+        render_filter_exp(report, include_node.template),
+        only_string,
+    )
+
+    if extra_context:
+        yield '{% endwith %}'
 
 
 def render_filter_exp(report, filter_expression):
@@ -207,6 +226,13 @@ def _filter_expression(report, filter_expression):
         if args:
             args = args[0][1:] # Drop "False" initial arg
             yield '(%s)' % ', '.join('\'%s\'' % x for x in args)
+
+
+def render_extra_context(report, extra_context):
+    return ', '.join(
+        '%s=%s' % (x, render_filter_exp(report, y))
+        for x, y in sorted(extra_context.items())
+    )
 
 
 TOKEN_WRAPPERS = {
