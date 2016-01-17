@@ -166,3 +166,28 @@ def handle_filter_expression(report, filter_expression):
         if args:
             args = args[0][1:] # Drop "False" initial arg
             yield '(%s)' % ', '.join('\'%s\'' % x for x in args)
+
+
+TOKEN_WRAPPERS = {
+    tokens.TOKEN_VAR: (
+        tokens.VARIABLE_TAG_START,
+        tokens.VARIABLE_TAG_END,
+    ),
+    tokens.TOKEN_BLOCK: (
+        tokens.BLOCK_TAG_START,
+        tokens.BLOCK_TAG_END,
+    ),
+    tokens.TOKEN_COMMENT: (
+        tokens.COMMENT_TAG_START,
+        tokens.COMMENT_TAG_END,
+    ),
+}
+
+
+def render_django_token(token):
+    if token.token_type == tokens.TOKEN_TEXT:
+        return token.contents
+
+    else:
+        start, end = TOKEN_WRAPPERS[token.token_type]
+        return '%s %s %s' % (start, token.contents, end)
