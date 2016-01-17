@@ -23,11 +23,22 @@ def handle_text_node(report, text_node):
     yield text_node.s
 
 
+VAR_NODE_SPECIAL_CASES = {
+    'block.super': 'super()',
+}
+
+
 @handler('VariableNode')
 def handle_variable_node(report, var_node):
-    yield '{{ '
-    yield ''.join(handle_filter_expression(report, var_node.filter_expression))
-    yield ' }}'
+    exp_components = handle_filter_expression(
+        report,
+        var_node.filter_expression,
+    )
+
+    node_text = ''.join(exp_components)
+    node_text = VAR_NODE_SPECIAL_CASES.get(node_text, node_text)
+
+    yield '{{ %s }}' % node_text
 
 
 @handler('IfNode')
@@ -91,6 +102,16 @@ def handle_extends_node(report, extends_node):
 
     for node in extends_node.nodelist:
         yield handle(report, node)
+
+
+@handler('BlockNode')
+def handle_block_node(report, block_node):
+    yield '{%% block %s %%}' % block_node.name
+
+    for node in block_node.nodelist:
+        yield handle(report, node)
+
+    yield '{% endblock %}'
 
 
 def handle_filter_expression(report, filter_expression):
