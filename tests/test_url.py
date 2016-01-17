@@ -39,3 +39,7 @@ def test_url_as(assert_equal):
         '{% url "foo:bar" as my_url %}',
         '{% set my_url = url(\'foo:bar\') %}',
     )
+
+def test_url_required_global(transpile):
+    _, report = transpile('{% url "foo:bar" %}')
+    assert "url" in report.required_globals

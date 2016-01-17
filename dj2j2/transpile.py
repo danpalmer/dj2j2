@@ -141,6 +141,8 @@ def handle_csrf_token_node(report, csrf_token_node):
 
 @handler('URLNode')
 def handle_url_node(report, url_node):
+    report.add_required_global('url')
+
     url = render_filter_exp(report, url_node.view_name)
 
     args = ', '.join(render_filter_exp(report, x) for x in url_node.args)
