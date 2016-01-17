@@ -1,4 +1,8 @@
+import click
+
+from django.template import base as tokens
 from django.utils.safestring import SafeText
+
 
 NODE_TYPE_HANDLERS = {}
 
@@ -8,7 +12,17 @@ def transpile_template(report, template):
 
 
 def handle(report, node):
-    return ''.join(NODE_TYPE_HANDLERS[node.__class__.__name__](report, node))
+    try:
+        return ''.join(
+            NODE_TYPE_HANDLERS[node.__class__.__name__](report, node)
+        )
+    except Exception:
+        click.echo("Failed in file:\n\t%s at line: %d\n\t%s" % (
+            report.current_file,
+            node.token.lineno,
+            render_django_token(node.token),
+        ))
+        raise
 
 
 def handler(node_type):
