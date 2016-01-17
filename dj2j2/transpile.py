@@ -129,7 +129,7 @@ def handle_url_node(report, url_node):
 
     kwargs = ', '.join(
         '%s=%s' % (x, ''.join(handle_filter_expression(report, y)))
-        for x, y in url_node.kwargs.items()
+        for x, y in sorted(url_node.kwargs.items())
     )
 
     # First yield the lead in...
