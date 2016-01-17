@@ -8,8 +8,10 @@ class Report(object):
         self.required_libraries = {}
         self.failed_files = {}
         self.current_file = None
+        self.num_files = 0
 
     def set_current_file(self, current_file):
+        self.num_files += 1
         self.current_file = current_file
 
     def add_required_library(self, library, lineno):

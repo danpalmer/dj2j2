@@ -80,6 +80,7 @@ def transpile_file(report, infile_path, outfile_path):
 
     with open(infile_path, 'r') as infile:
         with open(outfile_path, 'w') as outfile:
+            report.set_current_file(infile_path)
             outfile.write(transpile_content(report, infile.read()))
 
 
