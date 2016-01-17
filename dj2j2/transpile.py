@@ -119,6 +119,40 @@ def handle_csrf_token_node(report, csrf_token_node):
     yield '{{ csrf_input }}'
 
 
+@handler('URLNode')
+def handle_url_node(report, url_node):
+    url = ''.join(handle_filter_expression(report, url_node.view_name))
+
+    args = ', '.join(
+        ''.join(handle_filter_expression(report, x)) for x in url_node.args
+    )
+
+    kwargs = ', '.join(
+        '%s=%s' % (x, ''.join(handle_filter_expression(report, y)))
+        for x, y in url_node.kwargs.items()
+    )
+
+    # First yield the lead in...
+    if url_node.asvar:
+        yield '{%% set %s = ' % url_node.asvar
+    else:
+        yield '{{ '
+
+    # ...then the actual url expression...
+    if args:
+        yield 'url(%s, %s)' % (url, args)
+    elif kwargs:
+        yield 'url(%s, %s)' % (url, kwargs)
+    else:
+        yield 'url(%s)' % url
+
+    # ...and finally lead out
+    if url_node.asvar:
+        yield ' %}'
+    else:
+        yield ' }}'
+
+
 def handle_filter_expression(report, filter_expression):
     if isinstance(filter_expression.var, SafeText):
         yield '\'%s\'' % filter_expression.var
