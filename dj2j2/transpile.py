@@ -1,3 +1,5 @@
+from django.utils.safestring import SafeText
+
 NODE_TYPE_HANDLERS = {}
 
 def transpile_template(report, template):
@@ -80,8 +82,22 @@ def handle_load_node(report, load_node):
     yield '' # We must yield content
 
 
+@handler('ExtendsNode')
+def handle_extends_node(report, extends_node):
+    exp_components = handle_filter_expression(report, extends_node.parent_name)
+    extends = ''.join(exp_components)
+
+    yield '{%% extends %s %%}' % extends
+
+    for node in extends_node.nodelist:
+        yield handle(report, node)
+
+
 def handle_filter_expression(report, filter_expression):
-    yield filter_expression.var.var
+    if isinstance(filter_expression.var, SafeText):
+        yield '\'%s\'' % filter_expression.var
+    else:
+        yield filter_expression.var.var
 
     for filter_, args in filter_expression.filters:
         if callable(filter_):
