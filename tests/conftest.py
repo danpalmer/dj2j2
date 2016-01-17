@@ -3,7 +3,8 @@ import pytest
 import subprocess
 
 import dj2j2
-from jinja2 import Template as JTemplate
+
+from dj2j2.jinja_env import jinja_environment
 
 @pytest.fixture(scope='session')
 def dj2j2_run():
@@ -45,7 +46,7 @@ def transpile():
     def inner(content):
         report = dj2j2.Report()
         output = dj2j2.transpile_content(report, content)
-        JTemplate(output)
+        jinja_environment.from_string(output)
         return output, report
     return inner
 

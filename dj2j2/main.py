@@ -2,12 +2,12 @@
 import os
 import click
 
-from jinja2 import Template as JTemplate
 from django.template import Template as DTemplate
 
 from .utils import ensure_dir_exists
 from .report import Report
 from .transpile import transpile_template
+from .jinja_env import jinja_environment
 from .django_settings import configure_django
 
 
@@ -106,6 +106,6 @@ def validate_dir(report, outdir, extension):
 def validate_file(report, outfile_path):
     try:
         with open(outfile_path, 'r') as outfile:
-            JTemplate(outfile.read()) # ignore result
+            jinja_environment.from_string(outfile.read())
     except Exception as e:
         report.add_failed_file(outfile_path, e)
