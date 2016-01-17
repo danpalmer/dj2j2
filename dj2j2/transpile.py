@@ -171,6 +171,23 @@ def handle_url_node(report, url_node):
         yield ' }}'
 
 
+@handler('WithNode')
+def handle_with_node(report, with_node):
+    report.add_required_extension('jinja2.ext.with_')
+
+    with_string = ', '.join(
+        '%s=%s' % (x, render_filter_exp(report, y))
+        for x, y in sorted(with_node.extra_context.items())
+    )
+
+    yield '{%% with %s %%}' % with_string
+
+    for node in with_node.nodelist:
+        yield handle(report, node)
+
+    yield '{% endwith %}'
+
+
 def render_filter_exp(report, filter_expression):
     return ''.join(_filter_expression(report, filter_expression))
 
