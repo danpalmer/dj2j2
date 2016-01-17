@@ -61,10 +61,26 @@ def handle_if_node(report, if_node):
         if condition is None:
             yield '{% else %}'
         else:
-            condition = condition.value
-            condition_text = ''.join(
-                handle_filter_expression(report, condition),
-            )
+            if not condition.value:
+                # Condition is a boolean expression
+                condition_text = '%s %s %s' % (
+                    ''.join(handle_filter_expression(
+                        report,
+                        condition.first.value,
+                    )),
+                    condition.id,
+                    ''.join(handle_filter_expression(
+                        report,
+                        condition.second.value,
+                    )),
+                )
+            else:
+                # Condition is a simple filter expression
+                condition = condition.value
+                condition_text = ''.join(
+                    handle_filter_expression(report, condition),
+                )
+
             yield '{%% %s %s %%}' % (
                 'if' if idx == 0 else 'elif',
                 condition_text,

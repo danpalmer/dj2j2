@@ -57,3 +57,15 @@ def test_if_elif_else(assert_equal):
         '{% if foo %}{% elif bar %}{% else %}{% endif %}',
         '{% if foo %}{% elif bar %}{% else %}{% endif %}',
     )
+
+def test_if_boolean_condition(assert_equal):
+    assert_equal(
+        '{% if foo == "bar" %}{% endif %}',
+        '{% if foo == \'bar\' %}{% endif %}',
+    )
+
+def test_if_boolean_condition_var(assert_equal):
+    assert_equal(
+        '{% if foo == bar %}{% endif %}',
+        '{% if foo == bar %}{% endif %}',
+    )
