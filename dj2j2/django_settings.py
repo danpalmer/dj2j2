@@ -7,7 +7,9 @@ def configure_django():
         return
 
     settings.configure(
-        INSTALLED_APPS=[],
+        INSTALLED_APPS=[
+            'django.contrib.humanize',
+        ],
         TEMPLATES=[
             {
                 'BACKEND': 'django.template.backends.django.DjangoTemplates',
