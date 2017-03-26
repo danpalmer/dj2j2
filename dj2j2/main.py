@@ -19,7 +19,7 @@ from .django_settings import configure_django
 )
 @click.option(
     '--outdir',
-    type=click.Path(exists=True),
+    type=click.Path(exists=False),
     help="Output directory",
 )
 @click.option(
@@ -29,7 +29,7 @@ from .django_settings import configure_django
 )
 @click.option(
     '--outfile',
-    type=click.Path(exists=True),
+    type=click.Path(exists=False),
     help="Output file",
 )
 @click.option(
