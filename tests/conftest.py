@@ -5,6 +5,7 @@ import subprocess
 import dj2j2
 
 from dj2j2.jinja_env import jinja_environment
+from dj2j2.exceptions import StopTranspilation
 
 
 @pytest.fixture(scope='session')
@@ -49,7 +50,12 @@ def data_file(data_path):
 def transpile():
     def inner(content):
         report = dj2j2.Report()
-        output = dj2j2.transpile_content(report, content)
+
+        try:
+            output = dj2j2.transpile_content(report, content)
+        except StopTranspilation:
+            return None, report
+
         jinja_environment.from_string(output)
         return output, report
     return inner

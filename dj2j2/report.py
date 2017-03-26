@@ -10,6 +10,14 @@ class Report(object):
         self.required_libraries = defaultdict(list)
         self.required_extensions = defaultdict(list)
         self.required_globals = defaultdict(list)
+        self.required_tags = defaultdict(list)
+        self.required_filters = defaultdict(list)
+
+        # Keep track of missing things we would need to mock out in a
+        # successful transpilation run
+        self.missing_custom_tags = []
+        self.missing_custom_filters = []
+        self.missing_custom_libraries = []
 
         # Django/Jinja2 are slightly different for includes.
         self.invalid_includes = []
@@ -42,3 +50,20 @@ class Report(object):
 
     def add_failed_file(self, filename, exc):
         self.failed_files[filename] = exc
+
+    def add_required_tag(self, tag_name, token):
+        position = Position(token.lineno, self.current_file)
+        self.required_tags[position].append(tag_name)
+
+    def add_required_filter(self, filter_name, token):
+        position = Position(token.lineno, self.current_file)
+        self.required_filters[position].append(filter_name)
+
+    def add_missing_tag(self, tag_name):
+        self.missing_custom_tags.append(tag_name)
+
+    def add_missing_filter(self, filter_name):
+        self.missing_custom_filters.append(filter_name)
+
+    def add_missing_library(self, library):
+        self.missing_custom_libraries.append(library)

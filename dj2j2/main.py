@@ -2,12 +2,14 @@
 import os
 import click
 
-from django.template import Template as DTemplate
+from django.template import Template as DTemplate, TemplateSyntaxError
+from django.template.base import FILTER_SEPARATOR, FILTER_ARGUMENT_SEPARATOR
 
 from .utils import ensure_dir_exists
 from .report import Report
 from .transpile import transpile_template
 from .jinja_env import jinja_environment
+from .exceptions import StopTranspilation
 from .django_settings import configure_django
 
 
@@ -81,12 +83,36 @@ def transpile_file(report, infile_path, outfile_path):
     with open(infile_path, 'r') as infile:
         with open(outfile_path, 'w') as outfile:
             report.set_current_file(infile_path)
-            outfile.write(transpile_content(report, infile.read()))
+            try:
+                outfile.write(transpile_content(report, infile.read()))
+            except StopTranspilation:
+                return
 
 
 def transpile_content(report, incontent):
     configure_django()
-    template = DTemplate(incontent)
+
+    try:
+        template = DTemplate(incontent)
+    except TemplateSyntaxError as tse:
+
+        if 'Did you forget to register or load this tag?' in str(tse):
+            tag = tse.token.split_contents()[0]
+            report.add_missing_tag(tag)
+            raise StopTranspilation()
+
+        if 'Invalid filter' in str(tse):
+            filters = tse.token.contents.split(FILTER_SEPARATOR)
+            filters = [f.split(FILTER_ARGUMENT_SEPARATOR)[0] for f in filters]
+            raise StopTranspilation()
+
+        if 'is not a registered tag library' in str(tse):
+            library = tse.token.split_contents()[1]
+            report.add_missing_library(library)
+            raise StopTranspilation()
+
+        raise
+
     output = transpile_template(report, template)
     return ''.join(output)
 

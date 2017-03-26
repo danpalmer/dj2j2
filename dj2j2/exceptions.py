@@ -1,0 +1,2 @@
+class StopTranspilation(Exception):
+    pass
