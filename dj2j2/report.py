@@ -3,6 +3,7 @@ from collections import namedtuple, defaultdict
 
 Position = namedtuple('Position', ('lineno', 'filename'))
 
+
 class Report(object):
     def __init__(self):
         # These reports are 'detail' -> position

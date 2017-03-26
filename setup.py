@@ -2,10 +2,13 @@ from os import path
 from codecs import open
 from setuptools import setup, find_packages
 
+
 here = path.abspath(path.dirname(__file__))
+
 
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
+
 
 setup(
     name='dj2j2',

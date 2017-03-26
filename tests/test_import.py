@@ -1,2 +1,2 @@
 def test_import():
-    import dj2j2
+    import dj2j2 # NOQA

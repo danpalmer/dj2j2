@@ -6,6 +6,7 @@ from django.utils.safestring import SafeText
 
 NODE_TYPE_HANDLERS = {}
 
+
 def transpile_template(report, template):
     for node in template.nodelist:
         yield handle(report, node)
@@ -14,7 +15,7 @@ def transpile_template(report, template):
 def handle(report, node):
     try:
         return ''.join(
-            NODE_TYPE_HANDLERS[node.__class__.__name__](report, node)
+            NODE_TYPE_HANDLERS[node.__class__.__name__](report, node),
         )
     except Exception:
         click.echo("Failed in file:\n\t%s at line: %d\n\t%s" % (

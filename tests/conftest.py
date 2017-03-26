@@ -6,6 +6,7 @@ import dj2j2
 
 from dj2j2.jinja_env import jinja_environment
 
+
 @pytest.fixture(scope='session')
 def dj2j2_run():
     def inner(*args, **kwargs):
@@ -23,6 +24,7 @@ def dj2j2_run():
 
     return inner
 
+
 @pytest.fixture(scope='session')
 def data_path():
     def inner(name):
@@ -34,12 +36,14 @@ def data_path():
 
     return inner
 
+
 @pytest.fixture(scope='session')
 def data_file(data_path):
     def inner(name):
         with open(data_path(name)) as f:
             return f.read()
     return inner
+
 
 @pytest.fixture(scope='session')
 def transpile():
@@ -49,6 +53,7 @@ def transpile():
         jinja_environment.from_string(output)
         return output, report
     return inner
+
 
 @pytest.fixture(scope='session')
 def assert_equal(transpile):

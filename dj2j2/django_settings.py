@@ -25,4 +25,5 @@ def configure_django():
 
     configure_django._run = True
 
+
 configure_django._run = False
