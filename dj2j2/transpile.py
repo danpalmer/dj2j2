@@ -62,12 +62,18 @@ def handle_if_node(report, if_node):
             yield '{% else %}'
         else:
             if not condition.value:
-                # Condition is a boolean expression
-                condition_text = '%s %s %s' % (
-                    render_filter_exp(report, condition.first.value),
-                    condition.id,
-                    render_filter_exp(report, condition.second.value),
-                )
+                if condition.second:
+                    # Condition is a boolean expression
+                    condition_text = '%s %s %s' % (
+                        render_filter_exp(report, condition.first.value),
+                        condition.id,
+                        render_filter_exp(report, condition.second.value),
+                    )
+                else:
+                    condition_text = '%s %s' % (
+                        condition.id,
+                        render_filter_exp(report, condition.first.value),
+                    )
             else:
                 # Condition is a simple filter expression
                 condition = condition.value

@@ -81,3 +81,10 @@ def test_if_boolean_condition_var(assert_equal):
         '{% if foo == bar %}{% endif %}',
         '{% if foo == bar %}{% endif %}',
     )
+
+
+def test_if_no_second_component(assert_equal):
+    assert_equal(
+        '{% if not foo %}{% endif %}',
+        '{% if not foo %}{% endif %}',
+    )
