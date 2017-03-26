@@ -14,3 +14,6 @@ flake8-blind-except==0.1.1
 flake8-tidy-imports==1.0.2
 flake8-todo==0.7
 flake8-mutable==1.1.0
+
+# Testing
+tox
