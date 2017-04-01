@@ -1,4 +1,7 @@
+import textwrap
 from collections import namedtuple, defaultdict
+
+from .jinja_env import jinja_environment
 
 
 Position = namedtuple('Position', ('lineno', 'filename'))
@@ -30,6 +33,34 @@ class Report(object):
 
         # State
         self.current_file = None
+
+    def __str__(self):
+        template = textwrap.dedent("""
+            Finished processing, {{ report.num_files }} files.
+
+            {% if report.failed_files %}Some files failed to transpile:{% endif %}
+            {% for file, exc in report.failed_files.items() -%}
+                - {{ file }}
+                  {{ exc }}
+            {% endfor %}
+            {% if report.missing_custom_libraries or report.missing_custom_filters or report.missing_custom_tags -%}
+            In addition, to transpile you need to declare some custom filters/tags/libraries.
+            These can be added with --tags=tag1,tag2, or the same for filters or libraries.
+            You will need to ensure that all of these appear in your Jinja environment.
+
+            Tags: {% for tag in report.missing_custom_tags -%}
+                {{ tag }}{% if not loop.last %},{% endif %}
+            {%- endfor %}
+            Filters: {% for filter in report.missing_custom_filters -%}
+                {{ filter }}{% if not loop.last %},{% endif %}
+            {%- endfor %}
+            Libraries: {% for library in report.missing_custom_libraries -%}
+                {{ library }}{% if not loop.last %},{% endif %}
+            {%- endfor %}
+            {% endif %}
+        """).strip()
+
+        return jinja_environment.from_string(template).render({'report': self})
 
     def set_current_file(self, current_file):
         self.num_files += 1
