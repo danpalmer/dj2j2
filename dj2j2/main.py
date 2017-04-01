@@ -102,8 +102,13 @@ def transpile_content(report, incontent):
             raise StopTranspilation()
 
         if 'Invalid filter' in str(tse):
-            filters = tse.token.contents.split(FILTER_SEPARATOR)
+            filters = tse.token.contents.split(FILTER_SEPARATOR)[1:]
             filters = [f.split(FILTER_ARGUMENT_SEPARATOR)[0] for f in filters]
+            custom = set(filters) - set(get_all_standard_template_filters())
+
+            for filter_ in custom:
+                report.add_missing_filter(filter_)
+
             raise StopTranspilation()
 
         if 'is not a registered tag library' in str(tse):
