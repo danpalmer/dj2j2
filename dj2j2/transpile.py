@@ -249,6 +249,19 @@ def handle_regroup_node(report, regroup_node):
     )
 
 
+@handler('NowNode')
+def handle_now_node(report, now_node):
+    report.set_requires_django_compat()
+
+    if now_node.asvar:
+        yield '{%% set %s = now(\'%s\') %%}' % (
+            now_node.asvar,
+            now_node.format_string,
+        )
+    else:
+        yield '{{ now(\'%s\') }}' % now_node.format_string
+
+
 def render_filter_exp(report, filter_expression):
     return ''.join(_filter_expression(report, filter_expression))
 

@@ -26,6 +26,8 @@ class Report(object):
         self.failed_files = {}
         self.num_files = 0
 
+        self.requires_django_compat = False
+
         # State
         self.current_file = None
 
@@ -67,3 +69,6 @@ class Report(object):
 
     def add_missing_library(self, library):
         self.missing_custom_libraries.append(library)
+
+    def set_requires_django_compat(self):
+        self.requires_django_compat = True
