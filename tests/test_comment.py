@@ -12,6 +12,15 @@ def test_comment_block(assert_equal):
     )
 
 
+def test_comment_block_containing_syntax(assert_equal):
+    # This comment block contains invalid template syntax, ensure we aren't
+    # attempting to parse it.
+    assert_equal(
+        '{% comment %}{% include %}{% endcomment %}',
+        '{# {% include %} #}',
+    )
+
+
 test_multiline_comment_block_input = """
 {% comment %}
     Hello, world!

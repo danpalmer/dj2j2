@@ -3,7 +3,9 @@ from django.conf import settings
 
 import django.template.base
 from django.template import defaulttags
-from django.template.base import Node
+from django.template.base import Node, TextNode
+
+from .transpile import render_django_token
 
 
 def configure_django():
@@ -52,8 +54,21 @@ def patch_django_templates():
 
     @defaulttags.register.tag
     def comment(parser, token):
-        nodelist = parser.parse(parse_until=['endcomment'])
-        parser.tokens.pop(0) # Pop the endcomment token, we're done with it.
+        nodelist = []
+
+        # Manually consume tokens until we reach encomment. This roughly
+        # follows the process in `Parser.parse()`, however treats everything
+        # as a TextNode so that we don't accidentally check the syntax of
+        # comments as templates.
+        while parser.tokens:
+            token = parser.next_token()
+            command = token.contents.split()[0]
+            if command == 'endcomment':
+                break
+
+            node = TextNode(render_django_token(token))
+            parser.extend_nodelist(nodelist, node, token)
+
         return CommentNode(nodelist)
 
     # To capture the special comment syntax, we patch the translator comment
