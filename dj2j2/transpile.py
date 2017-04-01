@@ -236,6 +236,19 @@ def handle_comment_node(report, comment_node):
     )
 
 
+@handler('RegroupNode')
+def handle_regroup_node(report, regroup_node):
+    as_name = regroup_node.var_name
+    group_by_exp = render_filter_exp(report, regroup_node.expression)
+    group_by_exp = re.sub(r'^%s\.' % as_name, '', group_by_exp)
+
+    yield '{%% set %s = %s|groupby(\'%s\') %%}' % (
+        as_name,
+        render_filter_exp(report, regroup_node.target),
+        group_by_exp,
+    )
+
+
 def render_filter_exp(report, filter_expression):
     return ''.join(_filter_expression(report, filter_expression))
 
