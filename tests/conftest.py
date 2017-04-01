@@ -6,6 +6,7 @@ import dj2j2
 
 from dj2j2.jinja_env import jinja_environment
 from dj2j2.exceptions import StopTranspilation
+from dj2j2.django_settings import configure_django
 
 
 @pytest.fixture(scope='session')
@@ -68,3 +69,16 @@ def assert_equal(transpile):
         assert second == output
         return output, report
     return inner
+
+
+@pytest.fixture(scope='session')
+def assert_fails(transpile):
+    def inner(first):
+        output, report = transpile(first)
+        assert output is None
+        return output, report
+    return inner
+
+
+def pytest_sessionstart(session):
+    configure_django()
