@@ -14,10 +14,9 @@ def transpile_template(report, template):
 
 
 def handle(report, node):
+    handler_fn = NODE_TYPE_HANDLERS[node.__class__.__name__]
     try:
-        return ''.join(
-            NODE_TYPE_HANDLERS[node.__class__.__name__](report, node),
-        )
+        return ''.join(handler_fn(report, node))
     except Exception:
         click.echo("Failed in file:\n\t%s at line: %d\n\t%s" % (
             report.current_file,
