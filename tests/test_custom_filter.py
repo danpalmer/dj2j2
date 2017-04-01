@@ -18,3 +18,8 @@ def test_does_not_report_valid_filter(transpile):
 def test_does_not_include_filter_arguments(transpile):
     output, report = transpile('{{ foo|bar:"baz"|length }}')
     assert report.missing_custom_filters == set(['bar'])
+
+
+def test_does_not_include_other_syntax(transpile):
+    output, report = transpile('{{ foo|bar and x != "y" }}')
+    assert report.missing_custom_filters == set(['bar'])

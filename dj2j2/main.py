@@ -110,7 +110,21 @@ def transpile_content(report, infile_path, incontent):
             raise StopTranspilation()
 
         if 'Invalid filter' in str(tse):
-            filters = tse.token.contents.split(FILTER_SEPARATOR)[1:]
+            # We've got a possibly long and complex filter expression that we
+            # need to extract the custom filters from...
+
+            # First get each contiguous block of characters (i.e. a side of a
+            # boolean expression)
+            sections = tse.token.contents.split(' ')
+
+            # Filter to just those that contain a filter application
+            sections = [s for s in sections if '|' in s]
+
+            # Now for each one, extract all the filters, flattening sections
+            filters = [
+                f for s in sections for f in s.split(FILTER_SEPARATOR)[1:]
+            ]
+
             filters = [f.split(FILTER_ARGUMENT_SEPARATOR)[0] for f in filters]
             custom = set(filters) - set(get_all_standard_template_filters())
 
