@@ -61,23 +61,7 @@ def handle_if_node(report, if_node):
         if condition is None:
             yield '{% else %}'
         else:
-            if not condition.value:
-                if condition.second:
-                    # Condition is a boolean expression
-                    condition_text = '%s %s %s' % (
-                        render_filter_exp(report, condition.first.value),
-                        condition.id,
-                        render_filter_exp(report, condition.second.value),
-                    )
-                else:
-                    condition_text = '%s %s' % (
-                        condition.id,
-                        render_filter_exp(report, condition.first.value),
-                    )
-            else:
-                # Condition is a simple filter expression
-                condition = condition.value
-                condition_text = render_filter_exp(report, condition)
+            condition_text = render_condition(report, condition)
 
             yield '{%% %s %s %%}' % (
                 'if' if idx == 0 else 'elif',
@@ -88,6 +72,25 @@ def handle_if_node(report, if_node):
             yield handle(report, node)
 
     yield '{% endif %}'
+
+
+def render_condition(report, condition):
+    if not condition.value:
+        if condition.second:
+            # Condition is a boolean expression
+            return '%s %s %s' % (
+                render_condition(report, condition.first),
+                condition.id,
+                render_condition(report, condition.second),
+            )
+        else:
+            return '%s %s' % (
+                condition.id,
+                render_condition(report, condition.first),
+            )
+    else:
+        # Condition is a simple filter expression
+        return render_filter_exp(report, condition.value)
 
 
 @handler('ForNode')
