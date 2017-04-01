@@ -3,7 +3,7 @@ from django.conf import settings
 
 import django.template.base
 from django.template import defaulttags
-from django.template.base import Node, TextNode
+from django.template.base import Node, TextNode, NodeList
 
 from .transpile import render_django_token
 
@@ -54,7 +54,7 @@ def patch_django_templates():
 
     @defaulttags.register.tag
     def comment(parser, token):
-        nodelist = []
+        nodelist = NodeList()
 
         # Manually consume tokens until we reach encomment. This roughly
         # follows the process in `Parser.parse()`, however treats everything
