@@ -1,3 +1,4 @@
+import re
 import click
 
 from django.template import base as tokens
