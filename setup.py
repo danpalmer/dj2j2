@@ -38,6 +38,7 @@ setup(
         'click',
         'django',
         'jinja2',
+        'jinja2-django-compat',
     ],
     entry_points={
         'console_scripts': [
