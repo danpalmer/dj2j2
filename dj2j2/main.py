@@ -4,6 +4,7 @@ import click
 
 from django.template import Template as DTemplate, TemplateSyntaxError
 from django.template.base import FILTER_SEPARATOR, FILTER_ARGUMENT_SEPARATOR
+from jinja2.exceptions import TemplateAssertionError as JTemplateAssertionError
 
 from .utils import ensure_dir_exists, get_all_standard_template_filters
 from .report import Report
@@ -48,11 +49,9 @@ def run(indir, outdir, infile, outfile, extension):
 
     if infile and outfile:
         transpile_file(report, infile, outfile)
-        validate_file(report, outfile)
 
     elif indir and outdir and extension:
         transpile_dir(report, indir, outdir, extension)
-        validate_dir(report, outdir, extension)
 
     else:
         # Invalid argument set
@@ -81,15 +80,22 @@ def transpile_file(report, infile_path, outfile_path):
     ensure_dir_exists(os.path.dirname(outfile_path))
 
     with open(infile_path, 'r') as infile:
-        with open(outfile_path, 'w') as outfile:
-            report.set_current_file(infile_path)
-            try:
-                outfile.write(transpile_content(report, infile.read()))
-            except StopTranspilation:
-                return
+        report.set_current_file(infile_path)
+        try:
+            output = transpile_content(
+                report,
+                infile_path,
+                infile.read(),
+            )
+        except StopTranspilation:
+            return
+
+        if output:
+            with open(outfile_path, 'w') as outfile:
+                outfile.write(output)
 
 
-def transpile_content(report, incontent):
+def transpile_content(report, infile_path, incontent):
     configure_django()
 
     incontent = preprocess_content(incontent)
@@ -121,7 +127,18 @@ def transpile_content(report, incontent):
         raise
 
     output = transpile_template(report, template)
-    return ''.join(output)
+    output_string = ''.join(output)
+
+    try:
+        jinja_environment.from_string(output_string)
+    except JTemplateAssertionError as e:
+        report.set_requires_django_compat()
+        return
+    except Exception as e:
+        report.add_failed_file(infile_path, e)
+        return
+
+    return output_string
 
 
 def preprocess_content(content):
@@ -130,23 +147,3 @@ def preprocess_content(content):
     of the Django template engine, or by patching it.
     """
     return content.replace('{#', '{#{#').replace('#}', '#} #}')
-
-
-def validate_dir(report, outdir, extension):
-    outdir = os.path.abspath(outdir)
-
-    for dirpath, _, filenames in os.walk(outdir):
-        for filename in filenames:
-            if not filename.endswith('.%s' % extension):
-                continue
-
-            full_filename = os.path.join(dirpath, filename)
-            validate_file(report, full_filename)
-
-
-def validate_file(report, outfile_path):
-    try:
-        with open(outfile_path, 'r') as outfile:
-            jinja_environment.from_string(outfile.read())
-    except Exception as e:
-        report.add_failed_file(outfile_path, e)

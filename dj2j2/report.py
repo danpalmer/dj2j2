@@ -15,9 +15,9 @@ class Report(object):
 
         # Keep track of missing things we would need to mock out in a
         # successful transpilation run
-        self.missing_custom_tags = []
-        self.missing_custom_filters = []
-        self.missing_custom_libraries = []
+        self.missing_custom_tags = set()
+        self.missing_custom_filters = set()
+        self.missing_custom_libraries = set()
 
         # Django/Jinja2 are slightly different for includes.
         self.invalid_includes = []
@@ -62,13 +62,13 @@ class Report(object):
         self.required_filters[position].append(filter_name)
 
     def add_missing_tag(self, tag_name):
-        self.missing_custom_tags.append(tag_name)
+        self.missing_custom_tags.add(tag_name)
 
     def add_missing_filter(self, filter_name):
-        self.missing_custom_filters.append(filter_name)
+        self.missing_custom_filters.add(filter_name)
 
     def add_missing_library(self, library):
-        self.missing_custom_libraries.append(library)
+        self.missing_custom_libraries.add(library)
 
     def set_requires_django_compat(self):
         self.requires_django_compat = True

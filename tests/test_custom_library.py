@@ -7,4 +7,4 @@ def test_custom_library(assert_fails):
 
 def test_custom_library_record(transpile):
     output, report = transpile(custom_library_template)
-    assert report.missing_custom_libraries == ['foo']
+    assert report.missing_custom_libraries == set(['foo'])

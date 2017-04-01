@@ -53,7 +53,7 @@ def transpile():
         report = dj2j2.Report()
 
         try:
-            output = dj2j2.transpile_content(report, content)
+            output = dj2j2.transpile_content(report, None, content)
         except StopTranspilation:
             return None, report
 

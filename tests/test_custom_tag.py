@@ -7,4 +7,4 @@ def test_custom_tag(assert_fails):
 
 def test_custom_tag_record(transpile):
     output, report = transpile(custom_tag_template)
-    assert report.missing_custom_tags == ['static_absolute']
+    assert report.missing_custom_tags == set(['static_absolute'])
