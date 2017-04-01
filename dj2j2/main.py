@@ -5,7 +5,7 @@ import click
 from django.template import Template as DTemplate, TemplateSyntaxError
 from django.template.base import FILTER_SEPARATOR, FILTER_ARGUMENT_SEPARATOR
 
-from .utils import ensure_dir_exists
+from .utils import ensure_dir_exists, get_all_standard_template_filters
 from .report import Report
 from .transpile import transpile_template
 from .jinja_env import jinja_environment
@@ -92,6 +92,8 @@ def transpile_file(report, infile_path, outfile_path):
 def transpile_content(report, incontent):
     configure_django()
 
+    incontent = preprocess_content(incontent)
+
     try:
         template = DTemplate(incontent)
     except TemplateSyntaxError as tse:
@@ -120,6 +122,14 @@ def transpile_content(report, incontent):
 
     output = transpile_template(report, template)
     return ''.join(output)
+
+
+def preprocess_content(content):
+    """
+    Handle things that we can't do easily by interpreting the output
+    of the Django template engine, or by patching it.
+    """
+    return content.replace('{#', '{#{#').replace('#}', '#} #}')
 
 
 def validate_dir(report, outdir, extension):

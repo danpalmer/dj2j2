@@ -216,6 +216,23 @@ def handle_include_node(report, include_node):
         yield '{% endwith %}'
 
 
+@handler('CommentNode')
+def handle_comment_node(report, comment_node):
+    contents = ''.join(handle(report, node) for node in comment_node.nodelist)
+
+    def is_whitespace(c):
+        return re.match(r'\s', c) is not None
+
+    leading_whitespace = '' if is_whitespace(contents[0]) else ' '
+    trailing_whitespace = '' if is_whitespace(contents[-1]) else ' '
+
+    yield '{{#{}{}{}#}}'.format(
+        leading_whitespace,
+        contents,
+        trailing_whitespace,
+    )
+
+
 def render_filter_exp(report, filter_expression):
     return ''.join(_filter_expression(report, filter_expression))
 
@@ -259,9 +276,17 @@ TOKEN_WRAPPERS = {
 
 
 def render_django_token(token):
-    if token.token_type == tokens.TOKEN_TEXT:
+    token_type = token.token_type
+
+    # This token is _exactly_ the text token, meaning that it is an unmodified
+    # text node.
+    if token.token_type is tokens.TOKEN_TEXT:
         return token.contents
 
-    else:
-        start, end = TOKEN_WRAPPERS[token.token_type]
-        return '%s %s %s' % (start, token.contents, end)
+    # This token has the same value as the text token, but given the above did
+    # not match, it means this is a 'fake text' token, and is in fact a comment
+    if token.token_type == tokens.TOKEN_TEXT:
+        return '{# %s #}' % token.contents
+
+    start, end = TOKEN_WRAPPERS[token_type]
+    return '%s %s %s' % (start, token.contents, end)
