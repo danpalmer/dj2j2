@@ -22,5 +22,5 @@ def test_complex_regroup_2(assert_equal):
 def test_complex_regroup_groupby_expression(assert_equal):
     assert_equal(
         '{% regroup foo|dictsort:"1" by bar.y.0 as baz %}',
-        "{% set baz = foo|dictsort('1')|groupby('bar.y.0') %}",
+        "{% set baz = foo|dictsort('1')|groupby('bar.y[0]') %}",
     )

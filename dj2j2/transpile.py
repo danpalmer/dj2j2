@@ -296,7 +296,18 @@ def process_var(report, var):
         acc += component
         acc = VAR_SPECIAL_CASES.get(acc, acc)
 
-    return acc
+    # Now replace integer dotted components
+    acc2 = ''
+    for component in acc.split('.'):
+        is_digit = component.isdigit()
+        if acc2 and not is_digit:
+            acc2 += '.'
+        if is_digit:
+            acc2 += '[%s]' % component
+        else:
+            acc2 += component
+
+    return acc2
 
 
 def render_extra_context(report, extra_context):
