@@ -38,19 +38,12 @@ def handle_text_node(report, text_node):
     yield text_node.s
 
 
-VAR_NODE_SPECIAL_CASES = {
-    'block.super': 'super()',
-}
-
-
 @handler('VariableNode')
 def handle_variable_node(report, var_node):
     node_text = render_filter_exp(
         report,
         var_node.filter_expression,
     )
-
-    node_text = VAR_NODE_SPECIAL_CASES.get(node_text, node_text)
 
     yield '{{ %s }}' % node_text
 
@@ -262,6 +255,17 @@ def handle_now_node(report, now_node):
         yield '{{ now(\'%s\') }}' % now_node.format_string
 
 
+VAR_SPECIAL_CASES = {
+    'block.super': 'super()',
+    'forloop.last': 'loop.last',
+    'forloop.first': 'loop.first',
+    'forloop.counter': 'loop.index',
+    'forloop.counter0': 'loop.index0',
+    'forloop.revcounter': 'loop.revindex',
+    'forloop.revcounter0': 'loop.revindex0',
+}
+
+
 def render_filter_exp(report, filter_expression):
     return ''.join(_filter_expression(report, filter_expression))
 
@@ -270,7 +274,11 @@ def _filter_expression(report, filter_expression):
     if isinstance(filter_expression.var, SafeText):
         yield '\'%s\'' % filter_expression.var
     else:
-        yield filter_expression.var.var
+        var = filter_expression.var.var
+        var_components = var.split('.')
+        first = VAR_SPECIAL_CASES.get(var_components[0], var_components[0])
+        result = '.'.join([first] + var_components[1:])
+        yield VAR_SPECIAL_CASES.get(result, result)
 
     for filter_, args in filter_expression.filters:
         if callable(filter_):
