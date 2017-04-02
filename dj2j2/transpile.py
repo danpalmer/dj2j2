@@ -274,11 +274,7 @@ def _filter_expression(report, filter_expression):
     if isinstance(filter_expression.var, SafeText):
         yield '\'%s\'' % filter_expression.var
     else:
-        var = filter_expression.var.var
-        var_components = var.split('.')
-        first = VAR_SPECIAL_CASES.get(var_components[0], var_components[0])
-        result = '.'.join([first] + var_components[1:])
-        yield VAR_SPECIAL_CASES.get(result, result)
+        yield process_var(report, filter_expression.var.var)
 
     for filter_, args in filter_expression.filters:
         if callable(filter_):
@@ -287,6 +283,20 @@ def _filter_expression(report, filter_expression):
         if args:
             args = args[0][1:] # Drop "False" initial arg
             yield '(%s)' % ', '.join('\'%s\'' % x for x in args)
+
+
+def process_var(report, var):
+
+    # First apply any special case replacements, replacing only the minimum
+    # amount we can get away with at each stage.
+    acc = ''
+    for component in var.split('.'):
+        if acc:
+            acc += '.'
+        acc += component
+        acc = VAR_SPECIAL_CASES.get(acc, acc)
+
+    return acc
 
 
 def render_extra_context(report, extra_context):
