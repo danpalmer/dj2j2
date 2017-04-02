@@ -74,13 +74,28 @@ def test_forloop_last(assert_equal):
 
 
 def test_forloop_parentloop(transpile):
-    with pytest.raises(CompilationError):
-        transpile(
-            '''
-                {% for x in y %}
-                    {% for z in x %}
-                        {{ forloop.parentloop.counter }}
-                    {% endfor %}
+    _, report = transpile(
+        '''
+            {% for x in y %}
+                {% for z in x %}
+                    {{ forloop.parentloop.counter }}
                 {% endfor %}
-            ''',
-        )
+            {% endfor %}
+        ''',
+    )
+
+    expected = (
+        "Use of 'parentloop' can't be automatically migrated. The suggested "
+        "workaround is to capture the parent loop as a variable in the "
+        "enclosing scope with 'set'."
+    )
+
+    assert len(report.failed_files) == 1
+    assert str(list(report.failed_files.values())[0]) == expected
+
+
+def test_for_filter_exp(assert_equal):
+    assert_equal(
+        '{% for x in y|first %}{% endfor %}',
+        '{% for x in y|first %}{% endfor %}',
+    )

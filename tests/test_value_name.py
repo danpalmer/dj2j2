@@ -1,8 +1,7 @@
-import pytest
-
-from dj2j2.exceptions import CompilationError
-
-
 def test_indexing(transpile):
-    with pytest.raises(CompilationError):
-        _, report = transpile('{{ foo.7_days }}')
+    _, report = transpile('{{ foo.7_days }}')
+
+    expected = "'7_days' cannot start with a digit in Jinja templates"
+
+    assert len(report.failed_files) == 1
+    assert str(list(report.failed_files.values())[0]) == expected
