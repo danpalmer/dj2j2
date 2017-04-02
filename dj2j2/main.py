@@ -140,12 +140,12 @@ def transpile_content(report, infile_path, incontent):
 
         raise
 
+    try:
+        output = transpile_template(report, template)
+        output_string = ''.join(output)
     except CompilationError as ce:
         report.add_failed_file(infile_path, ce)
         raise StopTranspilation()
-
-    output = transpile_template(report, template)
-    output_string = ''.join(output)
 
     try:
         jinja_environment.from_string(output_string)
