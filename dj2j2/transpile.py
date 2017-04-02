@@ -319,6 +319,14 @@ def process_var(report, var):
                 ),
             )
 
+        if component == 'parentloop':
+            # We can't reliably convert uses of parentloop
+            raise CompilationError(
+                "Use of 'parentloop' can't be automatically migrated. "
+                "The suggested workaround is to capture the parent loop "
+                "as a variable in the enclosing scope with 'set'.",
+            )
+
     return acc2
 
 

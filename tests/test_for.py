@@ -1,3 +1,8 @@
+import pytest
+
+from dj2j2.exceptions import CompilationError
+
+
 def test_simple_for(assert_equal):
     assert_equal(
         '{% for x in y %}{% endfor %}',
@@ -68,5 +73,14 @@ def test_forloop_last(assert_equal):
     )
 
 
-def test_forloop_parentloop(assert_equal):
-    assert False
+def test_forloop_parentloop(transpile):
+    with pytest.raises(CompilationError):
+        transpile(
+            '''
+                {% for x in y %}
+                    {% for z in x %}
+                        {{ forloop.parentloop.counter }}
+                    {% endfor %}
+                {% endfor %}
+            ''',
+        )
