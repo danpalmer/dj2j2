@@ -68,5 +68,5 @@ def test_forloop_last(assert_equal):
     )
 
 
-def test_forloop_parentloo(assert_equal):
+def test_forloop_parentloop(assert_equal):
     assert False
