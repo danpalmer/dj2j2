@@ -51,9 +51,11 @@ class Report(object):
             Tags: {% for tag in report.missing_custom_tags -%}
                 {{ tag }}{% if not loop.last %},{% endif %}
             {%- endfor %}
+
             Filters: {% for filter in report.missing_custom_filters -%}
                 {{ filter }}{% if not loop.last %},{% endif %}
             {%- endfor %}
+
             Libraries: {% for library in report.missing_custom_libraries -%}
                 {{ library }}{% if not loop.last %},{% endif %}
             {%- endfor %}
