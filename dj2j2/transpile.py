@@ -4,6 +4,8 @@ import click
 from django.template import base as tokens
 from django.utils.safestring import SafeText
 
+from .exceptions import CompilationError
+
 
 NODE_TYPE_HANDLERS = {}
 
@@ -306,6 +308,16 @@ def process_var(report, var):
             acc2 += '[%s]' % component
         else:
             acc2 += component
+
+    # Now add errors for invalid syntax in Jinja
+    for component in acc2.split('.'):
+        if component[0].isdigit():
+            # This identifier starts with a digit, which is not valid in Jinja
+            raise CompilationError(
+                "'%s' cannot start with a digit in Jinja templates" % (
+                    component,
+                ),
+            )
 
     return acc2
 

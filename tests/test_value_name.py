@@ -1,3 +1,8 @@
+import pytest
+
+from dj2j2.exceptions import CompilationError
+
+
 def test_indexing(transpile):
-    _, report = transpile('{{ foo.7_days }}')
-    assert report.failed_files == {None: "Identifiers cannot begin with digits"}
+    with pytest.raises(CompilationError):
+        _, report = transpile('{{ foo.7_days }}')

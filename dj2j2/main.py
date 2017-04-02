@@ -10,7 +10,7 @@ from .utils import ensure_dir_exists, get_all_standard_template_filters
 from .report import Report
 from .transpile import transpile_template
 from .jinja_env import jinja_environment
-from .exceptions import StopTranspilation
+from .exceptions import StopTranspilation, CompilationError
 from .django_settings import configure_django
 
 
@@ -139,6 +139,10 @@ def transpile_content(report, infile_path, incontent):
             raise StopTranspilation()
 
         raise
+
+    except CompilationError as ce:
+        report.add_failed_file(infile_path, ce)
+        raise StopTranspilation()
 
     output = transpile_template(report, template)
     output_string = ''.join(output)
