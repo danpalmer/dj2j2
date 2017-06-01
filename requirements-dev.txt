@@ -1,6 +1,6 @@
 # Linting tools
 pep8==1.7.0
-isort==4.2.5
+isort==4.2.8
 flake8==2.6.2
 bandit==1.3.0
 
